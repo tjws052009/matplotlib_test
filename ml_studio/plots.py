@@ -70,8 +70,8 @@ def render_figures(
     return figures
 
 
-def _new_figure(height: float = 4.0) -> Figure:
-    fig = Figure(figsize=(6.4, height), dpi=110, layout="constrained")
+def _new_figure(height: float = 4.0, *, width: float = 6.4) -> Figure:
+    fig = Figure(figsize=(width, height), dpi=110, layout="constrained")
     FigureCanvasAgg(fig)
     fig.patch.set_facecolor(PAPER)
     return fig
@@ -95,31 +95,56 @@ def _style(ax: Any) -> None:
 
 
 def _scores(task: str, metrics: dict[str, Any]) -> bytes:
-    fig = _new_figure()
-    ax = fig.add_subplot(1, 1, 1)
+    return _png(_scores_figure(task, metrics))
+
+
+def _scores_figure(task: str, metrics: dict[str, Any]) -> Figure:
     if task == "classification":
-        labels = ["Accuracy", "F1 (macro)"]
-        train = [metrics["train_accuracy"], metrics["train_f1_macro"]]
-        test = [metrics["test_accuracy"], metrics["test_f1_macro"]]
-        title = f"Test accuracy {metrics['test_accuracy']:.3f}"
-        ylim = (0.0, 1.0)
-    else:
-        labels = ["R²", "Mean absolute error"]
-        train = [metrics["train_r2"], metrics["train_mae"]]
-        test = [metrics["test_r2"], metrics["test_mae"]]
-        title = f"Test R² {metrics['test_r2']:.3f}"
-        ylim = None
+        # Accuracy and F1 are both fractions, so they share one 0–1 axis.
+        fig = _new_figure()
+        ax = fig.add_subplot(1, 1, 1)
+        _paired_bars(
+            ax,
+            ["Accuracy", "F1 (macro)"],
+            [metrics["train_accuracy"], metrics["train_f1_macro"]],
+            [metrics["test_accuracy"], metrics["test_f1_macro"]],
+        )
+        ax.set_ylim(0.0, 1.0)
+        ax.set_title(f"Test accuracy {metrics['test_accuracy']:.3f}")
+        _style(ax)
+        return fig
+    # R² and mean absolute error do not share a unit, so each has its own axis.
+    fig = _new_figure(width=7.2)
+    ax_r2 = fig.add_subplot(1, 2, 1)
+    ax_mae = fig.add_subplot(1, 2, 2)
+    _paired_bars(
+        ax_r2,
+        ["R²"],
+        [metrics["train_r2"]],
+        [metrics["test_r2"]],
+    )
+    _paired_bars(
+        ax_mae,
+        ["Mean absolute error"],
+        [metrics["train_mae"]],
+        [metrics["test_mae"]],
+    )
+    ax_r2.set_title("R²")
+    ax_mae.set_title("Mean absolute error")
+    _style(ax_r2)
+    _style(ax_mae)
+    return fig
+
+
+def _paired_bars(
+    ax: Any, labels: list[str], train: list[float], test: list[float]
+) -> None:
     positions = np.arange(len(labels))
     width = 0.36
     ax.bar(positions - width / 2, train, width=width, color=TRAIN, label="Train")
     ax.bar(positions + width / 2, test, width=width, color=TEST, label="Test")
     ax.set_xticks(positions, labels)
-    ax.set_title(title)
     ax.legend(frameon=False)
-    if ylim is not None:
-        ax.set_ylim(*ylim)
-    _style(ax)
-    return _png(fig)
 
 
 def _confusion(
@@ -203,8 +228,12 @@ def _projection(
     fig = _new_figure()
     ax = fig.add_subplot(1, 1, 1)
     xy = plane.test_xy
-    if task == "classification":
+    if task == "classification" and plane.predict is not None:
         _classification_plane(ax, plane, y_test, class_names or [])
+    elif task == "classification":
+        # A projection has no grid in the original columns. Color the true class.
+        _class_scatter(ax, xy, y_test, class_names or [])
+        ax.set_title("Test rows on two components")
     else:
         residual = np.abs(plane.y_residual)
         points = ax.scatter(
@@ -217,7 +246,10 @@ def _projection(
             linewidth=0.3,
         )
         fig.colorbar(points, ax=ax, fraction=0.046, pad=0.04, label="|residual|")
-        ax.set_title("Test rows on two components")
+        if plane.predict is None:
+            ax.set_title("Test rows on two components")
+        else:
+            ax.set_title("Test rows")
     ax.set_xlabel(plane.xlabel)
     ax.set_ylabel(plane.ylabel)
     _style(ax)
@@ -237,6 +269,7 @@ def _classification_plane(
         np.linspace(y_min, y_max, steps),
     )
     grid = np.column_stack([xx.ravel(), yy.ravel()])
+    # predict is the model on these same two columns, not a reconstruction.
     predicted = np.asarray(plane.predict(grid))
     classes = np.unique(np.concatenate([y_test, predicted]))
     zz = np.searchsorted(classes, predicted).reshape(xx.shape)
@@ -250,6 +283,22 @@ def _classification_plane(
         cmap=cmap,
         alpha=0.45,
     )
+    _class_scatter(ax, xy, y_test, class_names, classes=classes, colors=colors)
+    ax.set_title("Decision regions and test rows")
+
+
+def _class_scatter(
+    ax: Any,
+    xy: np.ndarray,
+    y_test: np.ndarray,
+    class_names: list[str],
+    classes: np.ndarray | None = None,
+    colors: list[Any] | None = None,
+) -> None:
+    if classes is None:
+        classes = np.unique(y_test)
+    if colors is None:
+        colors = _class_colors(len(classes))
     show_legend = len(classes) <= 6
     for position, label in enumerate(classes):
         mask = y_test == label
@@ -264,7 +313,6 @@ def _classification_plane(
             label=name if show_legend else None,
             zorder=3,
         )
-    ax.set_title("Decision regions and test rows")
     if show_legend:
         ax.legend(frameon=False, fontsize=8)
 

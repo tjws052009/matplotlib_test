@@ -49,6 +49,7 @@ taskSelect.addEventListener("change", () => {
   fillDatasets();
   fillEstimators();
 });
+// Rebuild that dataset's fields before a submit reads them.
 datasetSelect.addEventListener("change", () => {
   showSelectedDataset();
   fillEstimators();
@@ -72,6 +73,7 @@ async function boot() {
     fillEstimators();
     setFormEnabled(true);
     await refreshJobs();
+    // The fit runs on a worker. Poll until its figures are ready.
     window.setInterval(() => {
       refreshJobs();
     }, 1000);
@@ -228,6 +230,7 @@ function readControl(spec, input) {
   if (spec.type === "choice") {
     return input.value;
   }
+  // An empty optional number means "no limit", stored by the server as null.
   if (spec.nullable && input.value === "") {
     return null;
   }
@@ -337,7 +340,11 @@ async function refreshJobs() {
 }
 
 function renderJobs() {
-  const signature = jobs.map((job) => `${job.id}:${job.status}:${job.stage}`).join("|") + `#${selectedId}`;
+  // Redraw only when status, stage, or the selected job changes.
+  // A poll that changes nothing else would otherwise rebuild the buttons.
+  const signature = jobs
+    .map((job) => `${job.id}:${job.status}:${job.stage}`)
+    .join("|") + `#${selectedId}`;
   if (signature !== listSignature) {
     listSignature = signature;
     jobList.replaceChildren();

@@ -152,6 +152,117 @@ def test_logistic_regression_on_blobs_reports_accuracy_and_png_figures():
         assert len(payload) > _MINIMUM_PNG_BYTES
 
 
+def test_regression_score_chart_separates_r2_and_absolute_error():
+    from ml_studio.plots import _scores_figure
+
+    fig = _scores_figure(
+        "regression",
+        {
+            "train_r2": 0.47,
+            "test_r2": 0.46,
+            "train_mae": 45.6,
+            "test_mae": 46.0,
+        },
+    )
+    fig.canvas.draw()
+    assert [ax.get_title() for ax in fig.axes] == ["R²", "Mean absolute error"]
+    r2_span = fig.axes[0].get_ylim()[1] - fig.axes[0].get_ylim()[0]
+    mae_span = fig.axes[1].get_ylim()[1] - fig.axes[1].get_ylim()[0]
+    assert mae_span > r2_span * 5
+
+
+def test_split_skips_stratify_for_a_singleton_class():
+    from ml_studio.train import _split
+
+    features = [[0.0, 0.0]] * 5
+    target = [0, 0, 0, 0, 1]
+    request = {"task": "classification", "test_size": 0.4, "random_state": _SEED}
+    _x_train, _x_test, y_train, y_test = _split(request, features, target)
+    assert len(y_train) + len(y_test) == 5
+
+
+def test_split_does_not_hide_an_unrelated_error(monkeypatch):
+    from ml_studio import train as train_mod
+
+    def fail_once(*_args, **_kwargs):
+        raise ValueError("bad columns")
+
+    monkeypatch.setattr(train_mod, "train_test_split", fail_once)
+    features = [[0.0, 0.0]] * 8
+    target = [0, 0, 0, 0, 1, 1, 1, 1]
+    request = {"task": "classification", "test_size": 0.25, "random_state": _SEED}
+    with pytest.raises(ValueError, match="bad columns"):
+        train_mod._split(request, features, target)
+
+
+def test_projection_of_iris_does_not_invent_a_decision_grid():
+    from sklearn.datasets import load_iris
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.model_selection import train_test_split
+
+    from ml_studio.train import _plane
+
+    bunch = load_iris()
+    x_train, x_test, y_train, y_test = train_test_split(
+        bunch.data,
+        bunch.target,
+        test_size=0.25,
+        random_state=_SEED,
+        stratify=bunch.target,
+    )
+    estimator = LogisticRegression(max_iter=200).fit(x_train, y_train)
+    plane = _plane(
+        estimator,
+        x_train,
+        x_test,
+        y_test,
+        estimator.predict(x_test),
+        list(bunch.feature_names),
+        _SEED,
+        "classification",
+    )
+    assert plane is not None
+    assert plane.predict is None
+    assert plane.xlabel == "Component 1"
+    result = fit_job(
+        _classification_request(
+            dataset="iris",
+            dataset_parameters={},
+            parameters={"C": 1.0, "max_iter": 200},
+        )
+    )
+    assert result.figures["projection"].startswith(_PNG_SIGNATURE)
+
+
+def test_two_feature_plane_predicts_on_those_columns():
+    from sklearn.datasets import make_blobs
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.model_selection import train_test_split
+
+    from ml_studio.train import _plane
+
+    features, target = make_blobs(
+        n_samples=80, centers=3, n_features=2, random_state=_SEED
+    )
+    x_train, x_test, y_train, y_test = train_test_split(
+        features, target, test_size=0.25, random_state=_SEED, stratify=target
+    )
+    estimator = LogisticRegression(max_iter=200).fit(x_train, y_train)
+    plane = _plane(
+        estimator,
+        x_train,
+        x_test,
+        y_test,
+        estimator.predict(x_test),
+        ["x", "y"],
+        _SEED,
+        "classification",
+    )
+    row = x_test[:1]
+    assert plane.predict is not None
+    assert plane.predict(row).tolist() == estimator.predict(row).tolist()
+
+
 def test_linear_regression_reports_r2_and_residual_figures():
     result = fit_job(_regression_request())
     minimum_test_r2 = 0.9

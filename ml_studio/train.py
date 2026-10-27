@@ -50,7 +50,7 @@ class _Plane:
     test_xy: np.ndarray
     xlabel: str
     ylabel: str
-    predict: Any
+    predict: Any  # model on this plane, or None when the axes are a projection
     y_residual: np.ndarray | None = None
 
 
@@ -192,13 +192,13 @@ def _split(
         "test_size": request["test_size"],
         "random_state": request["random_state"],
     }
+    # Stratify only when every class has at least two rows. A singleton
+    # class cannot sit in both splits. Any other error is left unchanged.
     if request["task"] == "classification":
-        kwargs["stratify"] = target
-    try:
-        return train_test_split(features, target, **kwargs)
-    except ValueError:
-        kwargs.pop("stratify", None)
-        return train_test_split(features, target, **kwargs)
+        _classes, counts = np.unique(target, return_counts=True)
+        if int(counts.min()) >= 2:
+            kwargs["stratify"] = target
+    return train_test_split(features, target, **kwargs)
 
 
 def _estimator(request: dict[str, Any]) -> Any:
@@ -317,18 +317,15 @@ def _plane(
         )
     if x_train.shape[1] < 2:
         return None
+    # These coordinates are a projection of the original columns.
+    # Predicting the inverse transform would color a reconstructed row,
+    # not the test row drawn at that point, so this plane has no grid.
     pca = PCA(n_components=2, random_state=random_state)
-    train_xy = pca.fit_transform(x_train)
-    test_xy = pca.transform(x_test)
-
-    def predict(coordinates: np.ndarray) -> np.ndarray:
-        return estimator.predict(pca.inverse_transform(coordinates))
-
     return _Plane(
-        train_xy=train_xy,
-        test_xy=test_xy,
+        train_xy=pca.fit_transform(x_train),
+        test_xy=pca.transform(x_test),
         xlabel="Component 1",
         ylabel="Component 2",
-        predict=predict,
+        predict=None,
         y_residual=residual,
     )
