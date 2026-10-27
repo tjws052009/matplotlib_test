@@ -50,6 +50,7 @@ taskSelect.addEventListener("change", () => {
   fillEstimators();
 });
 datasetSelect.addEventListener("change", () => {
+  showSelectedDataset();
   fillEstimators();
 });
 estimatorSelect.addEventListener("change", renderEstimatorParameters);
@@ -96,6 +97,10 @@ function fillDatasets() {
   if ([...datasetSelect.options].some((item) => item.value === current)) {
     datasetSelect.value = current;
   }
+  showSelectedDataset();
+}
+
+function showSelectedDataset() {
   const dataset = selectedDataset();
   datasetDescription.textContent = dataset ? dataset.description : "";
   renderParameterBlock(datasetParameters, dataset ? dataset.parameters : [], "data");
@@ -214,6 +219,9 @@ function readSpecs(specs, prefix) {
 }
 
 function readControl(spec, input) {
+  if (!input) {
+    throw new Error(`Missing control for ${spec.name}.`);
+  }
   if (spec.type === "bool") {
     return input.checked;
   }
@@ -236,17 +244,13 @@ async function onSubmit(event) {
   if (!form.reportValidity()) {
     return;
   }
-  const dataset = selectedDataset();
-  const estimator = selectedEstimator();
-  const shared = readSpecs(catalogData.shared_parameters, "shared");
-  const payload = {
-    dataset: dataset.id,
-    estimator: estimator.id,
-    dataset_parameters: readSpecs(dataset.parameters, "data"),
-    parameters: readSpecs(estimator.parameters, "est"),
-    test_size: shared.test_size,
-    random_state: shared.random_state,
-  };
+  let payload;
+  try {
+    payload = buildPayload();
+  } catch (error) {
+    formError.textContent = error.message;
+    return;
+  }
   posting = true;
   setFormEnabled(false);
   submitButton.textContent = "Queuing…";
@@ -271,6 +275,23 @@ async function onSubmit(event) {
     submitButton.textContent = "Run learning job";
     setFormEnabled(true);
   }
+}
+
+function buildPayload() {
+  const dataset = selectedDataset();
+  const estimator = selectedEstimator();
+  if (!dataset || !estimator) {
+    throw new Error("Choose a dataset and an estimator.");
+  }
+  const shared = readSpecs(catalogData.shared_parameters, "shared");
+  return {
+    dataset: dataset.id,
+    estimator: estimator.id,
+    dataset_parameters: readSpecs(dataset.parameters, "data"),
+    parameters: readSpecs(estimator.parameters, "est"),
+    test_size: shared.test_size,
+    random_state: shared.random_state,
+  };
 }
 
 function setFormEnabled(enabled) {
