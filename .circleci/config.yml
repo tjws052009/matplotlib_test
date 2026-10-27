@@ -29,7 +29,7 @@ commands:
           name: Merge with upstream
           command: |
             if ! git remote -v | grep upstream; then
-              git remote add upstream https://github.com/matplotlib/matplotlib.git
+              git remote add upstream https://github.com/tjws052009/matplotlib_test.git
             fi
             git fetch upstream
             if [[ "$CIRCLE_BRANCH" != "main" ]] && \
