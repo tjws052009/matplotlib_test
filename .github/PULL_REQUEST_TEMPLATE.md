@@ -2,14 +2,21 @@
 <!-- 👉 Please check our development guide https://matplotlib.org/devdocs/devel/index.html -->
 <!-- 👉 Tips for pull requests: https://matplotlib.org/devdocs/devel/pr_guide.html#pull-request-guidelines -->
 
-## PR summary
-<!-- ✍️ Describe what issue is resolved and why you chose this solution in your own words (no AI please). -->
-<!-- 👉 Tip: Use "Closes #0000" to link the related issue -->
+## PR name
+<!-- ✍️ One line. This is the GitHub title, for example: Add ability to plot timedeltas -->
 
+## Description
+<!-- ✍️ What changed and why, in your own words. -->
+<!-- 👉 Connect an issue: Closes #0000 or Fixes #0000 -->
 
-## AI Disclosure
+## Impact
+<!-- ✍️ Who is affected, and what behavior or docs change. -->
+
+## Decisions
+<!-- ✍️ What was chosen and what was rejected. Write None. when there are none. -->
+
+## AI disclosure
 <!-- ✍️ Describe if and how AI is used. See https://matplotlib.org/devdocs/devel/contribute.html#use-of-generative-ai -->
-
 
 ## PR quality check
 <!-- ✍️ Please check the relevant boxes below: "x" to indicate completion, "N/A" if the item is not applicable -->
