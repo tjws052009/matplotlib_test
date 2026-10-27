@@ -1,0 +1,29 @@
+---
+description: New code must not call deprecated Matplotlib APIs
+alwaysApply: true
+---
+
+# No deprecated APIs
+
+New and changed code must not call an API Matplotlib has deprecated. Before finishing, search the diff for `@_api.deprecated`, `.. deprecated::`, `warn_deprecated`, and `MatplotlibDeprecationWarning`.
+
+Use the replacement named in the deprecation warning. Do not add a public wrapper that calls the deprecated name.
+
+```python
+# ❌ BAD — matplotlib.transforms.nonsingular was deprecated in 3.11
+from matplotlib.transforms import nonsingular
+vmin, vmax = nonsingular(vmin, vmax)
+
+# ✅ GOOD — call the replacement
+from matplotlib.transforms import _nonsingular
+vmin, vmax = _nonsingular(vmin, vmax)
+```
+
+A test may call a deprecated API only to lock the warning, and it must assert that warning:
+
+```python
+with pytest.warns(mpl.MatplotlibDeprecationWarning, match="deprecated"):
+    fig.number = 2
+```
+
+Do not silence `MatplotlibDeprecationWarning` with a blanket filter.

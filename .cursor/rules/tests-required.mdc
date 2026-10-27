@@ -1,0 +1,25 @@
+---
+description: Behavior changes need tests that assert the outcome
+alwaysApply: true
+---
+
+# Tests
+
+A change to behavior needs a test that fails on the old behavior. Put Matplotlib tests in `lib/matplotlib/tests/`.
+
+Assert the outcome. A test that only calls a function is not a test. Prefer a value assertion over an image comparison when the numbers are what matter. Use `@image_comparison` only when the picture is the behavior. New image tests use `style='mpl20'`, pass `remove_text=True` when text is not the subject, and commit the baseline image.
+
+Check the edges the change can get wrong: empty input, a sequence where a scalar used to be assumed, and the failure path.
+
+```python
+# ❌ BAD — no assertion, so a regression still passes
+def test_bar_width_sequence():
+    ax.bar([0, 1], [1, 2], width=[0.2, 0.4], align="edge")
+
+# ✅ GOOD — the assertion is the behavior
+def test_bar_width_sequence():
+    bars = ax.bar([0, 1], [1, 2], width=[0.2, 0.4], align="edge")
+    assert [bar.get_width() for bar in bars] == [0.2, 0.4]
+```
+
+Docs-only and comment-only changes do not need a test. Say that in the PR summary.

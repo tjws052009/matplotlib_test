@@ -1,0 +1,38 @@
+---
+description: New libraries must be named in the PR and added to every dependency list
+alwaysApply: true
+---
+
+# New libraries
+
+A new runtime, build, or test dependency is part of the PR. In the PR summary, name the library, the minimum version, and why it was added. Do not leave it only in a lockfile or one requirements list.
+
+Update every place `pyproject.toml` names when the dependency list changes:
+
+- `[project] dependencies` and `[dependency-groups] build` in `pyproject.toml`
+- `[build-system] requires` when the library is needed to build
+- `lib/matplotlib/__init__.py` (`_check_versions()`) when import enforces a minimum
+- `ci/minver-requirements.txt`
+- `doc/install/dependencies.rst`
+- `environment.yml`
+- a note in `doc/api/next_api_changes/development/`
+
+```toml
+# ❌ BAD — pinned in one list and never mentioned in the PR summary
+dependencies = [
+    "contourpy >= 1.2.1",
+    "some-new-lib >= 1",
+]
+```
+
+```toml
+# ✅ GOOD — the same pin is added to each list above
+dependencies = [
+    "contourpy >= 1.2.1",
+    "some-new-lib >= 1",
+]
+```
+
+The PR summary for that change must include a line such as: `Add some-new-lib >= 1 to parse the new legend label format.`
+
+A major-version bump of a library already in the list gets the same note.
