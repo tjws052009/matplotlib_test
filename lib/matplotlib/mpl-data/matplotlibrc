@@ -434,7 +434,7 @@
 
 #axes.unicode_minus: True  # use Unicode for the minus symbol rather than hyphen.  See
                            # https://en.wikipedia.org/wiki/Plus_and_minus_signs#Character_codes
-#axes.prop_cycle: cycler(color='tab10')
+#axes.prop_cycle: cycler('color', ['a50f15', 'e31a1c', 'fb6a4a', '7f0000', 'fc9272', 'cb181d', 'fd8d3c', '99000d', 'fdbb84', '67000d'])
                   # color cycle for plot lines as either a named color sequence or a list
                   # of string color specs: single letter, long name, or web-style hex
                   # As opposed to all other parameters in this file, the color

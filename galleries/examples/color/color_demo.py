@@ -25,8 +25,7 @@ Matplotlib recognizes the following formats to specify a color:
    include color.
 9) one of ``{'tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple',
    'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan'}`` which are
-   the Tableau Colors from the 'tab10' categorical palette (which is the
-   default color cycle);
+   the Tableau Colors from the 'tab10' categorical palette;
 
 For more information on colors in matplotlib see
 

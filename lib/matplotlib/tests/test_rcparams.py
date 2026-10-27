@@ -700,3 +700,36 @@ def test_defaults_as_code():
             # backend has special handling and no meaningful default
             continue
         assert param.default == mpl.rcParamsDefault[param.name], param.name
+
+
+# Contract for the default x-y cycle. Kept here, not imported from rcsetup,
+# so a drift in the default fails this test.
+_RED_DEFAULT_CYCLE = [
+    "#a50f15",
+    "#e31a1c",
+    "#fb6a4a",
+    "#7f0000",
+    "#fc9272",
+    "#cb181d",
+    "#fd8d3c",
+    "#99000d",
+    "#fdbb84",
+    "#67000d",
+]
+
+
+def test_default_axes_prop_cycle_is_red_based():
+    colors = mpl.rcParamsDefault["axes.prop_cycle"].by_key()["color"]
+    assert colors == _RED_DEFAULT_CYCLE
+    assert mpl.rcParamsDefault["image.cmap"] == "viridis"
+
+
+def test_plot_without_color_uses_red_default_cycle():
+    mpl.style.use("default")
+    _, ax = plt.subplots()
+    first = ax.plot([0, 1], [0, 1])[0]
+    second = ax.plot([0, 1], [1, 0])[0]
+    explicit = ax.plot([0, 1], [0.5, 0.5], color="k")[0]
+    assert first.get_color() == _RED_DEFAULT_CYCLE[0]
+    assert second.get_color() == _RED_DEFAULT_CYCLE[1]
+    assert explicit.get_color() == "k"

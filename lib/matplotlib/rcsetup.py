@@ -1553,6 +1553,22 @@ class _Subsection:
 # single source of truth.
 #
 # In the transition phase, consistency is ensured via tests.
+
+# Default x-y color cycle. Stored with a leading '#' so it matches the
+# matplotlibrc parser, which accepts the same values without the '#'.
+_DEFAULT_PROP_CYCLE_COLORS = (
+    "#a50f15",
+    "#e31a1c",
+    "#fb6a4a",
+    "#7f0000",
+    "#fc9272",
+    "#cb181d",
+    "#fd8d3c",
+    "#99000d",
+    "#fdbb84",
+    "#67000d",
+)
+
 _DEFINITION = [
     _Section("Figure"),
     _Param(
@@ -1963,19 +1979,7 @@ _DEFINITION = [
     _Param(
         "axes.prop_cycle",
         type=Cycler,
-        default=cycler(
-            "color",
-            [(0.12156862745098039, 0.4666666666666667, 0.7058823529411765),
-             (1.0, 0.4980392156862745, 0.054901960784313725),
-             (0.17254901960784313, 0.6274509803921569, 0.17254901960784313),
-             (0.8392156862745098, 0.15294117647058825, 0.1568627450980392),
-             (0.5803921568627451, 0.403921568627451, 0.7411764705882353),
-             (0.5490196078431373, 0.33725490196078434, 0.29411764705882354),
-             (0.8901960784313725, 0.4666666666666667, 0.7607843137254902),
-             (0.4980392156862745, 0.4980392156862745, 0.4980392156862745),
-             (0.7372549019607844, 0.7411764705882353, 0.13333333333333333),
-             (0.09019607843137255, 0.7450980392156863, 0.8117647058823529)],
-        ),
+        default=cycler("color", _DEFAULT_PROP_CYCLE_COLORS),
         validator=validate_cycler,
         description="The property cycle used by plotting functions to vary artist "
                     "properties on subsequent calls."
