@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learning bench</title>
+  <link rel="stylesheet" href="/static/studio.css">
+</head>
+<body>
+  <header class="masthead">
+    <p class="eyebrow">Matplotlib × scikit-learn</p>
+    <h1>Learning bench</h1>
+    <p class="lede">
+      Choose a dataset and an estimator, set the fit, and leave the job on a
+      worker. The page stays usable while the model trains, then shows the
+      Matplotlib figures.
+    </p>
+  </header>
+  <main>
+    <form id="job-form" autocomplete="off">
+      <p id="form-status" class="status-line" role="status">Reading the catalog…</p>
+      <fieldset>
+        <legend>Data</legend>
+        <label>
+          Task
+          <select id="task" name="task" disabled></select>
+        </label>
+        <label>
+          Dataset
+          <select id="dataset" name="dataset" disabled></select>
+        </label>
+        <p id="dataset-description" class="hint"></p>
+        <div id="dataset-parameters" class="parameters"></div>
+      </fieldset>
+      <fieldset>
+        <legend>Estimator</legend>
+        <label>
+          Model
+          <select id="estimator" name="estimator" disabled></select>
+        </label>
+        <p id="estimator-description" class="hint"></p>
+        <div id="estimator-parameters" class="parameters"></div>
+      </fieldset>
+      <fieldset>
+        <legend>Holdout</legend>
+        <div id="shared-parameters" class="parameters"></div>
+      </fieldset>
+      <button id="submit" type="submit" disabled>Run learning job</button>
+      <p id="form-error" class="form-error" role="alert"></p>
+    </form>
+    <section id="board" aria-live="polite">
+      <div class="board-head">
+        <h2>Jobs</h2>
+        <p id="board-note" class="hint">A fit runs in the background. You can queue another.</p>
+      </div>
+      <div id="job-list" class="job-list"></div>
+      <article id="detail" class="detail">
+        <p id="empty" class="empty">No jobs yet. Set the parameters and run a learning job.</p>
+      </article>
+    </section>
+  </main>
+  <noscript>
+    <p class="noscript">This page needs JavaScript to submit a learning job.</p>
+  </noscript>
+  <script src="/static/studio.js"></script>
+</body>
+</html>

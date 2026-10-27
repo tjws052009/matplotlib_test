@@ -36,3 +36,9 @@ dependencies = [
 The PR summary for that change must include a line such as: `Add some-new-lib >= 1 to parse the new legend label format.`
 
 A major-version bump of a library already in the list gets the same note.
+
+A checkout tool that Matplotlib does not import is not one of those lists.
+Name the library, the minimum version, and why in the PR summary. Record the
+pin in an optional dependency group, `environment.yml`,
+`doc/install/dependencies.rst`, and `doc/api/next_api_changes/development/`.
+The note names each required-install file left unchanged.

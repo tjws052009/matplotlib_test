@@ -94,6 +94,16 @@ Animations
 * `ImageMagick <https://imagemagick.org/>`_: for saving
   animated gifs.
 
+Learning bench
+^^^^^^^^^^^^^^
+
+`scikit-learn <https://scikit-learn.org/>`_ (>= 1.4) runs ``ml_studio``, the
+local page that fits a model on a background worker and plots the result.
+Matplotlib does not import scikit-learn. From a checkout::
+
+    pip install -r ml_studio/requirements.txt
+    python -m ml_studio
+
 Font handling and rendering
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -71,3 +71,16 @@ acknowledge this by citing Matplotlib.
 [A ready-made citation
 entry](https://matplotlib.org/stable/users/project/citing.html) is
 available.
+
+## Learning bench
+
+This checkout includes `ml_studio`, a local page that fits a scikit-learn
+model on a background worker and plots the result with Matplotlib. From the
+repository root:
+
+```bash
+pip install -r ml_studio/requirements.txt
+python -m ml_studio
+```
+
+The page listens on http://127.0.0.1:47321. See `ml_studio/README.md`.
