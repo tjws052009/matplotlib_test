@@ -28,6 +28,8 @@ dependencies:
   - pyqt
   - python>=3.12
   - python-dateutil>=2.1
+  # Optional. ml_studio only; importing Matplotlib does not need it.
+  - scikit-learn>=1.4
   - setuptools_scm<10
   - wxpython
   # building documentation

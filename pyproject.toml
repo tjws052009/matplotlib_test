@@ -149,6 +149,10 @@ test-extra = [
     "pytz",
     "xarray",
 ]
+# Optional. Used only by ml_studio, not by `import matplotlib`.
+ml = [
+    "scikit-learn>=1.4",
+]
 
 # Extra pip requirements for the GitHub Actions mypy build
 typing = [
