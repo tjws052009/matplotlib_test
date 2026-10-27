@@ -19,13 +19,17 @@ Check the items that apply:
 - New or changed public signatures have type hints. Follow `follow-matplotlib-coding-guide`.
 - `ruff check` is clean. Pre-commit spelling and formatting pass when the hooks are installed.
 
-The title describes the change, for example `Add ability to plot timedeltas`. If a GitHub issue exists, the body contains `Closes #8869` or `Fixes #8869`.
+The title describes the change, for example `Add ability to plot timedeltas`. The body follows `create-matplotlib-pr` and connects an issue with `Closes #8869` or `Fixes #8869`.
 
 A PR that is not ready for a full review is a draft. Say why, and ask for the specific feedback you want. Reviewers do not read draft code unless asked.
 
 ## What the body must show
 
-Use the repository template: PR summary, AI disclosure, and the quality checklist. Mark a box `x` or `N/A`. State AI use in the disclosure. See `disclose-matplotlib-ai`.
+Follow `create-matplotlib-pr` and fill `.github/PULL_REQUEST_TEMPLATE.md`.
+
+The PR should be connected to an issue as much as possible. Titles should atleast include: PR name, Description, Impact, Decisions, AI disclosure.
+
+Keep the PR quality checklist. Mark a box `x` or `N/A`. State AI use under AI disclosure. See `disclose-matplotlib-ai`.
 
 ## Milestone, when you can set one
 
