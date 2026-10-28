@@ -101,6 +101,7 @@ to MATLAB®, a registered trademark of The MathWorks, Inc.
 
 """
 
+# This module defines the public matplotlib namespace and package metadata.
 __all__ = [
     "__bibtex__",
     "__version__",
